@@ -73,8 +73,8 @@ tools = [
 
 ]
 
-# Initialize LLM
-llm = Ollama(model="llama3.2:3b", base_url="http://localhost:11434")
+# Initialize LLM with ollama using your own model and base url
+llm = Ollama(model="", base_url="")
 
 
 # system prompt
