@@ -1,6 +1,6 @@
 import speech_recognition as sr
 import pyttsx3
-from Agents import agent
+from Agents import agent, llm
 import re
 
 
@@ -13,10 +13,24 @@ def speak(text):
 
 def processCommand(c):
     try:
-        response = agent.run(c)
-        speak("Finished processing your request sir, is there anything else I can help you with?")
+        action_words = ["open", "find", "search"]
+        if any(word in c.lower() for word in action_words):
+            # Use agent for action-based commands
+            response = agent.run(c)
+            speak("Finished Processing the request, Is there anything else I can help you with, sir?")
+        else:
+            # Use the same Ollama LLM instance for general questions
+            response = llm.invoke(
+                f"""As Jarvis, respond to: {c}
+                Remember to be:
+                - short, concise, human like and direct in your responses without crossquentionaing the user
+                """
+            )
+            speak(response)
+        
     except Exception as e:
-        speak(f"I encountered an error:")
+        print(f"Error: {str(e)}")  # Print the actual error for debugging
+        speak("I encountered an error while processing your request. Please try again, sir.")
     
 
 
@@ -61,6 +75,6 @@ if __name__ == '__main__':
         
         except Exception as e:
             print("Error {0}".format(e))
-        
+
 
 
