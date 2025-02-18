@@ -1,6 +1,7 @@
 import speech_recognition as sr
 import pyttsx3
 from Agents import agent
+import re
 
 
 recognizer = sr.Recognizer()
@@ -40,12 +41,17 @@ if __name__ == '__main__':
              audio = r.listen(source, timeout=5, phrase_time_limit=5)
             word = r.recognize_google(audio)
             if(word.lower()=="jarvis"):
-                speak("Yes Sir")
+                speak("  Yes Sir  ")
                 #listen for command now 
                 with sr.Microphone() as source:
                     print("Listening for command...")
                     audio = r.listen(source)
                     command = r.recognize_google(audio)
+
+                    # Check for termination command
+                    if command.lower() == "terminate":
+                        speak("Shutting down. Goodbye sir.")
+                        break
 
 
                     processCommand(command)

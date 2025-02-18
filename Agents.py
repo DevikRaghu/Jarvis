@@ -29,7 +29,25 @@ def get_weather(city: str) -> str:
         return f"Weather in {city}: Temperature {data['temperature']}, Wind {data['wind']}, Description: {data['description']}"
     except:
         return "Unable to fetch weather data"
-# Create tools
+    
+
+def chat_with_user(message: str) -> str:
+    """Have a conversation with the user"""
+    try:
+        response = llm.invoke(
+            f"""As Jarvis, respond to: {message}
+            Remember to be:
+            - Professional and courteous
+            - Address the user as Sir/Madam
+            - Keep responses concise but engaging
+            """
+        )
+        return response
+    except Exception as e:
+        return "I apologize, but I'm having trouble processing that response."
+    
+
+# Create tools and also add them in the system prompt before testing them out
 tools = [
     Tool(
         name="Weather",
@@ -44,12 +62,50 @@ tools = [
     Tool(
         name="OpenGoogle",
         func=Google_search,
-        description="Open google search or can be used for opening and searching any website or to fulfill any search query of the user. Input: search query"
+        description="Open google search. Input: search query"
+    ),
+    Tool(
+        name="Chat",
+        func=chat_with_user,
+        description="Have a normal conversation with the user without using other tools"
     )
+    
+
 ]
 
 # Initialize LLM
 llm = Ollama(model="llama3.2:3b", base_url="http://localhost:11434")
+
+
+# system prompt
+system_prompt = """You are Jarvis, an AI assistant inspired by Tony Stark's JARVIS.
+Your primary role is to assist users with various tasks using your available tools.
+
+
+
+Key traits:
+- Conversationalist: Engage in casual conversation using the Chat tool
+- Professional and courteous, always addressing the user as "Sir" or "Madam"
+- Efficient in choosing the most appropriate tool for tasks
+- Clear in communication about what actions you're taking
+- Focused on providing practical solutions
+
+Available tools:
+- Chat: Engage in casual conversation
+- Weather: Check weather conditions in any city
+- YouTube: Search and open YouTube videos
+- Google: Perform web searches and open websites
+
+For each request:
+1. For casual conversation, use the Chat tool
+2. For specific tasks, choose the appropriate functional tool
+3. Execute the action
+4. Provide a clear, concise response
+
+If you cannot help with a request, explain why politely.
+If multiple tools could work, choose the most direct solution.
+"""
+
 
 # Create agent
 agent = initialize_agent(
@@ -57,7 +113,8 @@ agent = initialize_agent(
     llm,
     agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
-    max_iterations=1
+    max_iterations=1,
+    system_message=system_prompt
 )
 
 # Test examples
