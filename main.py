@@ -1,7 +1,6 @@
 import speech_recognition as sr
-import webbrowser
 import pyttsx3
-import google.generativeai as genai
+from Agents import agent
 
 
 recognizer = sr.Recognizer()
@@ -12,27 +11,12 @@ def speak(text):
     engine.runAndWait()
 
 def processCommand(c):
-    if "open youtube" in c.lower():
-        speak("Opening Youtube")
-        webbrowser.open("https://www.youtube.com")
-    elif "open google" in c.lower():
-        speak("Opening Google")
-        webbrowser.open("https://www.google.com")
-    elif "open facebook" in c.lower():
-        speak("Opening Facebook")
-        webbrowser.open("https://www.facebook.com")
-    elif "open linkedin" in c.lower():
-        speak("Opening Linkedin")
-        webbrowser.open("https://www.linkedin.com")
-    else:
-        AiprocessCommand(c)
+    try:
+        response = agent.run(c)
+        speak("Finished processing your request sir, is there anything else I can help you with?")
+    except Exception as e:
+        speak(f"I encountered an error:")
     
-def AiprocessCommand(c): #processing the command using AI
-    
-    genai.configure(api_key="API_Key") # Replace with your Gemini API key
-    model = genai.GenerativeModel("gemini-1.5-flash")
-    response = model.generate_content(f"You are a virtual assistant and you are designed to help people with their daily tasks and giving short crisp responses with your tone based on the seriousness of question Assume you have been helping and you know me very well also as a rule give response in one time only treating it as a one time conversation dont ask any cross questions or anything just give the response in one time only. So my latest request with you as my assistant is   - {c}")
-    speak(response.text)
 
 
 if __name__ == '__main__':
@@ -53,7 +37,7 @@ if __name__ == '__main__':
         try:
             with sr.Microphone() as source:
              print("Listening...")
-             audio = r.listen(source, timeout=2, phrase_time_limit=1)
+             audio = r.listen(source, timeout=5, phrase_time_limit=5)
             word = r.recognize_google(audio)
             if(word.lower()=="jarvis"):
                 speak("Yes Sir")
